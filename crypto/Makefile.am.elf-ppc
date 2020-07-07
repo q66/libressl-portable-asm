@@ -1,0 +1,34 @@
+# 32-bit PowerPC, big endian, SVR4 ABI
+    
+ASM_PPC_ELF = aes/aes-elf-ppc.S
+ASM_PPC_ELF += aes/aesp8-elf-ppc.S
+ASM_PPC_ELF += aes/vpaes-elf-ppc.S
+ASM_PPC_ELF += bn/mont-elf-ppc.S
+ASM_PPC_ELF += modes/ghashp8-elf-ppc.S
+ASM_PPC_ELF += sha/sha1-elf-ppc.S
+ASM_PPC_ELF += sha/sha256-elf-ppc.S
+ASM_PPC_ELF += sha/sha256p8-elf-ppc.S
+ASM_PPC_ELF += sha/sha512-elf-ppc.S
+ASM_PPC_ELF += sha/sha512p8-elf-ppc.S
+ASM_PPC_ELF += cpuid-elf-ppc.S ppccap.c
+
+ASM_PPC_ELF += aes/aes_cbc.c
+ASM_PPC_ELF += aes/aes_core.c
+ASM_PPC_ELF += camellia/camellia.c
+ASM_PPC_ELF += camellia/cmll_cbc.c
+ASM_PPC_ELF += rc4/rc4_enc.c
+ASM_PPC_ELF += rc4/rc4_skey.c
+ASM_PPC_ELF += whrlpool/wp_block.c
+
+EXTRA_DIST += $(ASM_PPC_ELF)
+
+if HOST_ASM_ELF_PPC
+libcrypto_la_CPPFLAGS += -DAES_ASM
+libcrypto_la_CPPFLAGS += -DVPAES_ASM
+libcrypto_la_CPPFLAGS += -DOPENSSL_BN_ASM_MONT
+libcrypto_la_CPPFLAGS += -DSHA1_ASM
+libcrypto_la_CPPFLAGS += -DSHA256_ASM
+libcrypto_la_CPPFLAGS += -DSHA512_ASM
+libcrypto_la_CPPFLAGS += -DOPENSSL_CPUID_OBJ
+libcrypto_la_SOURCES += $(ASM_PPC_ELF)
+endif

@@ -46,7 +46,7 @@ Files `AUTHORS.txt` and `LICENSE.txt` are imported directly from OpenSSL.
 ## Supported platforms
 
  - 64-bit little endian POWER, ELFv2 ABI
- - 64-bit big endian POWER, ELFv2 ABI
+ - 64-bit big endian POWER, ELFv2 or ELFv1 ABI
  - 32-bit big endian PowerPC
 
 ## Usage

@@ -5,7 +5,7 @@
 # Currently supported:
 #
 # - 64-bit little endian POWER, ELFv2 ABI
-# - 64-bit big endian POWER, ELFv2 ABI
+# - 64-bit big endian POWER, ELFv2 or ELFv1 ABI
 # - 32-bit big endian PowerPC
 
 die() {
@@ -21,6 +21,7 @@ get_flavor() {
     case "$1" in
         ppc64le) echo linux64le ;;
         ppc64v2) echo linux64v2 ;;
+        ppc64) echo linux64 ;;
         ppc) echo linux32 ;;
         *) ;;
     esac
@@ -57,6 +58,7 @@ generate_ppc() {
 
 generate_ppc ppc64le
 generate_ppc ppc64v2
+generate_ppc ppc64
 generate_ppc ppc
 
 exit 0

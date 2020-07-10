@@ -1,10 +1,16 @@
-#! /usr/bin/env perl
-# Copyright 2006-2020 The OpenSSL Project Authors. All Rights Reserved.
+#!/usr/bin/env perl
+
+# PowerPC assembler distiller by \@dot-asm.
+
+################################################################
+# Recognized "flavour"-s are:
 #
-# Licensed under the Apache License 2.0 (the "License").  You may not use
-# this file except in compliance with the License.  You can obtain a copy
-# in the file LICENSE in the source distribution or at
-# https://www.openssl.org/source/license.html
+# linux{32|64}[le]  GNU assembler and ELF symbol decorations,
+#                   with little-endian option
+# linux64v2         GNU asssembler and big-endian instantiation
+#                   of latest ELF specification
+# aix{32|64}        AIX assembler and symbol decorations
+# osx{32|64}        Mac OS X assembler and symbol decoratons
 
 my $flavour = shift;
 my $output = shift;
@@ -306,7 +312,7 @@ while($line=<>) {
 
     $line =~ s|[#!;].*$||;	# get rid of asm-style comments...
     $line =~ s|/\*.*\*/||;	# ... and C-style comments...
-    $line =~ s|^\s+||;		# ... and skip whitespaces in beginning...
+    $line =~ s|^\s+||;		# ... and skip white spaces in beginning...
     $line =~ s|\s+$||;		# ... and at the end
 
     {
@@ -343,4 +349,4 @@ while($line=<>) {
     print "\n";
 }
 
-close STDOUT or die "error closing STDOUT: $!";
+close STDOUT;

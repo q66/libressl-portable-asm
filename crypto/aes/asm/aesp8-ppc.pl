@@ -1,11 +1,4 @@
-#! /usr/bin/env perl
-# Copyright 2014-2020 The OpenSSL Project Authors. All Rights Reserved.
-#
-# Licensed under the Apache License 2.0 (the "License").  You may not use
-# this file except in compliance with the License.  You can obtain a copy
-# in the file LICENSE in the source distribution or at
-# https://www.openssl.org/source/license.html
-
+#!/usr/bin/env perl
 #
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
@@ -43,10 +36,11 @@
 # POWER9[le]	4.02/0.86	0.84	1.05
 # POWER9[be]	3.99/0.78	0.79	0.97
 
-# $output is the last argument if it looks like a file (it has an extension)
-# $flavour is the first argument if it doesn't look like a file
-$output = $#ARGV >= 0 && $ARGV[$#ARGV] =~ m|\.\w+$| ? pop : undef;
-$flavour = $#ARGV >= 0 && $ARGV[0] !~ m|\.| ? shift : undef;
+# Fix backports for LibreSSL (@q66):
+#
+# https://github.com/openssl/openssl/commit/5dcfd6c50a216f81bf43e1f21bc5f3fc517ba47a
+
+$flavour = shift;
 
 if ($flavour =~ /64/) {
 	$SIZE_T	=8;
@@ -73,8 +67,7 @@ $0 =~ m/(.*[\/\\])[^\/\\]+$/; $dir=$1;
 ( $xlate="${dir}../../perlasm/ppc-xlate.pl" and -f $xlate) or
 die "can't locate ppc-xlate.pl";
 
-open STDOUT,"| $^X $xlate $flavour \"$output\""
-    or die "can't call $xlate: $!";
+open STDOUT,"| $^X $xlate $flavour ".shift || die "can't call $xlate: $!";
 
 $FRAME=8*$SIZE_T;
 $prefix="aes_p8";
@@ -3808,4 +3801,4 @@ foreach(split("\n",$code)) {
         print $_,"\n";
 }
 
-close STDOUT or die "error closing STDOUT: $!";
+close STDOUT;

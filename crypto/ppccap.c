@@ -78,6 +78,13 @@ void sha512_block_data_order(void *ctx, const void *inp, size_t len)
 }
 #endif
 
+#ifndef LSSL_USE_AUXV
+void OPENSSL_altivec_probe(void);
+void OPENSSL_crypto207_probe(void);
+void OPENSSL_fpu_probe(void);
+void OPENSSL_ppc64_probe(void);
+void OPENSSL_madd300_probe(void);
+
 static sigset_t all_masked;
 
 static sigjmp_buf ill_jmp;
@@ -85,12 +92,7 @@ static void ill_handler(int sig)
 {
 	siglongjmp(ill_jmp, sig);
 }
-
-void OPENSSL_altivec_probe(void);
-void OPENSSL_crypto207_probe(void);
-void OPENSSL_fpu_probe(void);
-void OPENSSL_ppc64_probe(void);
-void OPENSSL_madd300_probe(void);
+#endif
 
 #if defined(__GNUC__) && __GNUC__>=2
 void OPENSSL_cpuid_setup(void) __attribute__((constructor));
@@ -100,9 +102,18 @@ void
 OPENSSL_cpuid_setup(void)
 {
 	char *e;
+	static int trigger = 0;
+#ifdef LSSL_USE_AUXV
+	int fd;
+# ifdef __powerpc64__
+	Elf64_auxv_t aux;
+# else
+	Elf32_auxv_t aux;
+# endif
+#else
 	struct sigaction ill_oact, ill_act;
 	sigset_t oset;
-	static int trigger = 0;
+#endif
 
 	if (trigger)
 		return;
@@ -117,12 +128,7 @@ OPENSSL_cpuid_setup(void)
 	OPENSSL_ppccap_P = 0;
 
 #ifdef LSSL_USE_AUXV
-# ifdef __powerpc64__
-	Elf64_auxv_t aux;
-# else
-	Elf32_auxv_t aux;
-# endif
-	int fd = open("/proc/self/auxv", O_RDONLY | O_CLOEXEC);
+	fd = open("/proc/self/auxv", O_RDONLY | O_CLOEXEC);
 	unsigned long long hwcap = 0, hwcap2 = 0;
 	if (fd >= 0) {
 		while (read(fd, &aux, sizeof(aux)) == sizeof(aux)) {
@@ -163,9 +169,7 @@ OPENSSL_cpuid_setup(void)
 		if ((hwcap2 >> 23))
 			OPENSSL_ppccap_P |= PPC_MADD300;
 	}
-	return;
-#endif
-
+#else
 	/* fallback that uses SIGILL and probes */
 
 	memset(&ill_act, 0, sizeof(ill_act));
@@ -214,4 +218,5 @@ OPENSSL_cpuid_setup(void)
 
 	sigaction (SIGILL, &ill_oact, NULL);
 	sigprocmask(SIG_SETMASK, &oset, NULL);
+#endif
 }

@@ -36,9 +36,6 @@
 # POWER9[le]	4.02/0.86	0.84	1.05
 # POWER9[be]	3.99/0.78	0.79	0.97
 
-# Fix backports for LibreSSL (@q66):
-#
-# https://github.com/openssl/openssl/commit/5dcfd6c50a216f81bf43e1f21bc5f3fc517ba47a
 
 $flavour = shift;
 

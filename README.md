@@ -8,6 +8,11 @@ the difference can be as much as 20x in some cases.
 The assembly files are taken from CRYPTOGAMS by Andy Polyakov (dot-asm),
 see https://github.com/dot-asm/cryptogams and `LICENSE.cryptogams`.
 
+The following files are taken from OpenSSL and are subject to the OpenSSL
+license; pre-Apache 2.0 commits were used:
+
+- `ppc-mont.pl` - `774ff8fed67e19d4f5f0df2f59050f2737abab2a`
+
 Some files are currently adapted from OpenSSL commit
 `163b8016160f03558d8352b76fb594685cb39f7d`
 
@@ -37,9 +42,9 @@ has and LibreSSL lacks entirely, and so on.
 
 This project consists of:
 
-- Original perlasm assembly files (unmodified, besides `ppccpuid.pl` having
-  some unneeded bits removed) - you can verify those against upstream
-- Generated assembly files for all targets
+- Assembly files (`perlasm`) from the CRYPTOGAMS project
+- Assembly files (`perlasm`) from the OpenSSL project where not in the above
+- Generated assembly files (`.S`) using the above sources
 - Auxiliary C source files from OpenSSL (modified, stripped down)
 - Makefiles for assembly platforms
 - LibreSSL patches

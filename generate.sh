@@ -51,7 +51,7 @@ generate_ppc() {
     perlasm $1 aes/asm/aes-ppc.pl aes/aes
     perlasm $1 aes/asm/aesp8-ppc.pl aes/aesp8
     perlasm $1 aes/asm/vpaes-ppc.pl aes/vpaes
-    perlasm $1 bn/asm/ppc-mont.pl bn/mont outarg
+    perlasm $1 bn/asm/ppc-mont.pl bn/mont
     perlasm $1 modes/asm/ghashp8-ppc.pl modes/ghashp8 outarg
     perlasm $1 sha/asm/sha1-ppc.pl sha/sha1
     perlasm $1 sha/asm/sha512-ppc.pl sha/sha256 outarg

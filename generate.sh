@@ -7,6 +7,7 @@
 # - 64-bit little endian POWER, ELFv2 ABI
 # - 64-bit big endian POWER, ELFv2 or ELFv1 ABI
 # - 32-bit big endian PowerPC
+# - Aarch64
 
 die() {
     echo "$@"
@@ -19,6 +20,7 @@ fi
 
 get_flavor() {
     case "$1" in
+        aarch64) echo linux64; return 0 ;;
         ppc64le) echo linux64le; return 0 ;;
         ppc64v2) echo linux64v2; return 0 ;;
         ppc64) echo linux64; return 0 ;;
@@ -65,5 +67,16 @@ generate_ppc ppc64le
 generate_ppc ppc64v2
 generate_ppc ppc64
 generate_ppc ppc
+
+# aarch64
+
+perlasm aarch64 aes/asm/aesv8-armx.pl aes/aesv8 outarg
+perlasm aarch64 aes/asm/vpaes-armv8.pl aes/vpaes outarg
+perlasm aarch64 bn/asm/armv8-mont.pl bn/mont outarg
+perlasm aarch64 modes/asm/ghashv8-armx.pl modes/ghashv8 outarg
+perlasm aarch64 sha/asm/sha1-armv8.pl sha/sha1 outarg
+perlasm aarch64 sha/asm/sha512-armv8.pl sha/sha256 outarg
+perlasm aarch64 sha/asm/sha512-armv8.pl sha/sha512 outarg
+perlasm aarch64 arm64cpuid.pl cpuid outarg
 
 exit 0

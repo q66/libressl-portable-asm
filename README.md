@@ -8,7 +8,7 @@ the difference can be as much as 20x in some cases.
 The assembly files are taken from CRYPTOGAMS by Andy Polyakov (dot-asm),
 see https://github.com/dot-asm/cryptogams and `LICENSE.cryptogams`.
 
-- CRYPTOGAMS commit: `1d27e4fefa7bf058e6ac921eb75b6d3b4b84bfc9`.
+- CRYPTOGAMS commit: `1d27e4fefa7bf058e6ac921eb75b6d3b4b84bfc9`
 
 The following files are taken from OpenSSL and are subject to the OpenSSL
 license; pre-Apache 2.0 commits were used:

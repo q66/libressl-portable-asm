@@ -19,16 +19,6 @@ die "can't locate ppc-xlate.pl";
 
 open STDOUT,"| $^X $xlate $flavour ".shift || die "can't call $xlate: $!";
 
-if ($flavour=~/64/) {
-    $CMPLI="cmpldi";
-    $SHRLI="srdi";
-    $SIGNX="extsw";
-} else {
-    $CMPLI="cmplwi";
-    $SHRLI="srwi";
-    $SIGNX="mr";
-}
-
 $code=<<___;
 .machine	"any"
 .text

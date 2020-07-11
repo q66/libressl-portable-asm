@@ -14,6 +14,7 @@ The following files are taken from OpenSSL and are subject to the OpenSSL
 license; pre-Apache 2.0 commits were used:
 
 - `ppc-mont.pl`: `774ff8fed67e19d4f5f0df2f59050f2737abab2a`
+- `ppccpuid.pl`: OpenSSL 1.1.1g, just CPU probes
 
 See `LICENSE.openssl` for those.
 
@@ -49,12 +50,10 @@ This project consists of:
 - Assembly files (`perlasm`) from the CRYPTOGAMS project
 - Assembly files (`perlasm`) from the OpenSSL project where not in the above
 - Generated assembly files (`.S`) using the above sources
-- Auxiliary C source files from OpenSSL (modified, stripped down)
+- CPU feature checkers (new)
 - Makefiles for assembly platforms
 - LibreSSL patches
 - Scripts to put it all together
-
-Files `AUTHORS.txt` and `LICENSE.txt` are imported directly from OpenSSL.
 
 ## Supported platforms
 

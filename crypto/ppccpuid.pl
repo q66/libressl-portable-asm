@@ -1,25 +1,23 @@
 #! /usr/bin/env perl
 # Copyright 2007-2020 The OpenSSL Project Authors. All Rights Reserved.
 #
-# Licensed under the Apache License 2.0 (the "License").  You may not use
+# Licensed under the OpenSSL license (the "License").  You may not use
 # this file except in compliance with the License.  You can obtain a copy
 # in the file LICENSE in the source distribution or at
 # https://www.openssl.org/source/license.html
 
-# Adapted for LibreSSL-portable by stripping down
+# LibreSSL-portable-asm note (@q66):
+#
+# Taken from OpenSSL 1.1.1g, stripped down to just the CPU feature probes
 
-# $output is the last argument if it looks like a file (it has an extension)
-# $flavour is the first argument if it doesn't look like a file
-$output = $#ARGV >= 0 && $ARGV[$#ARGV] =~ m|\.\w+$| ? pop : undef;
-$flavour = $#ARGV >= 0 && $ARGV[0] !~ m|\.| ? shift : undef;
+$flavour = shift;
 
 $0 =~ m/(.*[\/\\])[^\/\\]+$/; $dir=$1;
 ( $xlate="${dir}ppc-xlate.pl" and -f $xlate ) or
 ( $xlate="${dir}perlasm/ppc-xlate.pl" and -f $xlate) or
 die "can't locate ppc-xlate.pl";
 
-open STDOUT,"| $^X $xlate $flavour \"$output\""
-    or die "can't call $xlate: $!";
+open STDOUT,"| $^X $xlate $flavour ".shift || die "can't call $xlate: $!";
 
 if ($flavour=~/64/) {
     $CMPLI="cmpldi";
@@ -34,6 +32,24 @@ if ($flavour=~/64/) {
 $code=<<___;
 .machine	"any"
 .text
+
+.globl	.OPENSSL_fpu_probe
+.align	4
+.OPENSSL_fpu_probe:
+	fmr	f0,f0
+	blr
+	.long	0
+	.byte	0,12,0x14,0,0,0,0,0
+.size	.OPENSSL_fpu_probe,.-.OPENSSL_fpu_probe
+.globl	.OPENSSL_ppc64_probe
+.align	4
+.OPENSSL_ppc64_probe:
+	fcfid	f1,f1
+	extrdi	r0,r0,32,0
+	blr
+	.long	0
+	.byte	0,12,0x14,0,0,0,0,0
+.size	.OPENSSL_ppc64_probe,.-.OPENSSL_ppc64_probe
 
 .globl	.OPENSSL_altivec_probe
 .align	4
@@ -53,6 +69,17 @@ $code=<<___;
 	.long	0
 	.byte	0,12,0x14,0,0,0,0,0
 .size	.OPENSSL_crypto207_probe,.-.OPENSSL_crypto207_probe
+
+.globl	.OPENSSL_madd300_probe
+.align	4
+.OPENSSL_madd300_probe:
+	xor	r0,r0,r0
+	maddld	r3,r0,r0,r0
+	maddhdu	r3,r0,r0,r0
+	blr
+	.long	0
+	.byte	0,12,0x14,0,0,0,0,0
+.size	.OPENSSL_madd300_probe,.-.OPENSSL_madd300_probe
 ___
 
 $code =~ s/\`([^\`]*)\`/eval $1/gem;

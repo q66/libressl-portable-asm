@@ -2,6 +2,30 @@
 .abiversion	2
 .text
 
+.globl	OPENSSL_fpu_probe
+.type	OPENSSL_fpu_probe,@function
+.align	4
+OPENSSL_fpu_probe:
+.localentry	OPENSSL_fpu_probe,0
+
+	fmr	0,0
+	blr	
+.long	0
+.byte	0,12,0x14,0,0,0,0,0
+.size	OPENSSL_fpu_probe,.-OPENSSL_fpu_probe
+.globl	OPENSSL_ppc64_probe
+.type	OPENSSL_ppc64_probe,@function
+.align	4
+OPENSSL_ppc64_probe:
+.localentry	OPENSSL_ppc64_probe,0
+
+	fcfid	1,1
+	rldicl	0,0,32,32
+	blr	
+.long	0
+.byte	0,12,0x14,0,0,0,0,0
+.size	OPENSSL_ppc64_probe,.-OPENSSL_ppc64_probe
+
 .globl	OPENSSL_altivec_probe
 .type	OPENSSL_altivec_probe,@function
 .align	4
@@ -26,3 +50,17 @@ OPENSSL_crypto207_probe:
 .long	0
 .byte	0,12,0x14,0,0,0,0,0
 .size	OPENSSL_crypto207_probe,.-OPENSSL_crypto207_probe
+
+.globl	OPENSSL_madd300_probe
+.type	OPENSSL_madd300_probe,@function
+.align	4
+OPENSSL_madd300_probe:
+.localentry	OPENSSL_madd300_probe,0
+
+	xor	0,0,0
+	.long	0x10600033
+	.long	0x10600031
+	blr	
+.long	0
+.byte	0,12,0x14,0,0,0,0,0
+.size	OPENSSL_madd300_probe,.-OPENSSL_madd300_probe

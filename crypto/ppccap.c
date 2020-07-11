@@ -88,6 +88,9 @@ static void ill_handler(int sig)
 
 void OPENSSL_altivec_probe(void);
 void OPENSSL_crypto207_probe(void);
+void OPENSSL_fpu_probe(void);
+void OPENSSL_ppc64_probe(void);
+void OPENSSL_madd300_probe(void);
 
 #if defined(__GNUC__) && __GNUC__>=2
 void OPENSSL_cpuid_setup(void) __attribute__((constructor));
@@ -132,11 +135,33 @@ OPENSSL_cpuid_setup(void)
 				if (hwcap) break;
 			}
 		}
-		if ((hwcap >> 28) & 1)
+
+		/* altivec */
+		if ((hwcap >> 28) & 1) {
 			OPENSSL_ppccap_P |= PPC_ALTIVEC;
-		/* vsx && vec_crypto */
-		if (((hwcap >> 7) & 1) && ((hwcap2 >> 25) & 1))
-			OPENSSL_ppccap_P |= PPC_CRYPTO207;
+
+			/* vsx && vec_crypto */
+			if (((hwcap >> 7) & 1) && ((hwcap2 >> 25) & 1))
+				OPENSSL_ppccap_P |= PPC_CRYPTO207;
+		}
+
+		/* fpu */
+		if ((hwcap >> 27) & 1) {
+			OPENSSL_ppccap_P |= PPC_FPU;
+# ifdef __powerpc64__
+			/* power6 */
+			if ((hwcap >> 9) & 1)
+				OPENSSL_ppccap_P |= PPC_FPU64;
+# else
+			/* ppc64, fpu64 is always fastest on 32-bit if available */
+			if ((hwcap >> 30) & 1)
+				OPENSSL_ppccap_P |= PPC_FPU64;
+#endif
+		}
+
+		/* isa 3.0 */
+		if ((hwcap2 >> 23))
+			OPENSSL_ppccap_P |= PPC_MADD300;
 	}
 	return;
 #endif
@@ -167,6 +192,24 @@ OPENSSL_cpuid_setup(void)
 			OPENSSL_crypto207_probe();
 			OPENSSL_ppccap_P |= PPC_CRYPTO207;
 		}
+	}
+
+	if (sigsetjmp(ill_jmp, 1) == 0) {
+		OPENSSL_fpu_probe();
+		OPENSSL_ppccap_P |= PPC_FPU;
+#ifndef __powerpc64__
+		if (sigsetjmp(ill_jmp, 1) == 0) {
+			OPENSSL_ppc64_probe();
+			OPENSSL_ppccap_P |= PPC_FPU64;
+		}
+#else
+		/* FIXME, detect power6 */
+#endif
+	}
+
+	if (sigsetjmp(ill_jmp, 1) == 0) {
+		OPENSSL_madd300_probe();
+		OPENSSL_ppccap_P |= PPC_MADD300;
 	}
 
 	sigaction (SIGILL, &ill_oact, NULL);

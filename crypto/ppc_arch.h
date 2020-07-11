@@ -9,5 +9,8 @@ extern unsigned int OPENSSL_ppccap_P;
 
 #define PPC_ALTIVEC   (1<<0)
 #define PPC_CRYPTO207 (1<<1)
+#define PPC_FPU       (1<<2)
+#define PPC_FPU64     (1<<3)
+#define PPC_MADD300   (1<<4)
 
 #endif

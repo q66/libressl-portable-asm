@@ -1,0 +1,27 @@
+This adds aarch64 sha512 probe support.
+
+--- a/crypto/armcap.c
++++ b/crypto/armcap.c
+@@ -25,6 +25,9 @@ void _armv7_neon_probe(void);
+ void _armv8_aes_probe(void);
+ void _armv8_sha1_probe(void);
+ void _armv8_sha256_probe(void);
++# ifdef __aarch64__
++void _armv8_sha512_probe(void);
++# endif
+ void _armv8_pmull_probe(void);
+ #endif
+ 
+@@ -80,6 +83,12 @@ OPENSSL_cpuid_setup(void)
+ 			_armv8_sha256_probe();
+ 			OPENSSL_armcap_P |= ARMV8_SHA256;
+ 		}
++# if defined(__aarch64__)
++		if (sigsetjmp(ill_jmp, 1) == 0) {
++			_armv8_sha512_probe();
++			OPENSSL_armcap_P |= ARMV8_SHA512;
++		}
++# endif
+ 	}
+ 
+ 	sigaction (SIGILL, &ill_oact, NULL);

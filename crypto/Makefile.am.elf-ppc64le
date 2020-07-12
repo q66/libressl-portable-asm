@@ -1,4 +1,5 @@
-    
+# 64-bit POWER, little endian, ELFv2 ABI
+
 ASM_PPC64LE_ELF = aes/aes-elf-ppc64le.S
 ASM_PPC64LE_ELF += aes/aesp8-elf-ppc64le.S
 ASM_PPC64LE_ELF += aes/vpaes-elf-ppc64le.S

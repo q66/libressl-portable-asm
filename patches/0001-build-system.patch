@@ -38,7 +38,7 @@ architectures and ABIs.
  EXTRA_libcrypto_la_SOURCES =
  
  include Makefile.am.elf-arm
-+#include Makefile.am.elf-aarch64
++include Makefile.am.elf-aarch64
  include Makefile.am.elf-x86_64
 +include Makefile.am.elf-ppc64le
 +include Makefile.am.elf-ppc64v2
@@ -49,7 +49,7 @@ architectures and ABIs.
  include Makefile.am.mingw64-x86_64
  
  if !HOST_ASM_ELF_ARM
-+#if !HOST_ASM_ELF_AARCH64
++if !HOST_ASM_ELF_AARCH64
  if !HOST_ASM_ELF_X86_64
 +if !HOST_ASM_ELF_PPC64LE
 +if !HOST_ASM_ELF_PPC64V2
@@ -65,7 +65,7 @@ architectures and ABIs.
 +endif
 +endif
 +endif
-+#endif
++endif
 +endif
  
  libcrypto_la_SOURCES += cpt_err.c

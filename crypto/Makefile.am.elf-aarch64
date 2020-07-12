@@ -1,0 +1,30 @@
+# Aarch64 (ARMv8), little endian
+
+ASM_AARCH64_ELF = aes/aesv8-elf-aarch64.S
+ASM_AARCH64_ELF += aes/vpaes-elf-aarch64.S
+ASM_AARCH64_ELF += bn/mont-elf-aarch64.S
+ASM_AARCH64_ELF += modes/ghashv8-elf-aarch64.S
+ASM_AARCH64_ELF += sha/sha1-elf-aarch64.S
+ASM_AARCH64_ELF += sha/sha256-elf-aarch64.S
+ASM_AARCH64_ELF += sha/sha512-elf-aarch64.S
+ASM_AARCH64_ELF += cpuid-elf-aarch64.S armcap.c
+
+ASM_AARCH64_ELF += aes/aes_cbc.c
+ASM_AARCH64_ELF += aes/aes_core.c
+ASM_AARCH64_ELF += camellia/camellia.c
+ASM_AARCH64_ELF += camellia/cmll_cbc.c
+ASM_AARCH64_ELF += rc4/rc4_enc.c
+ASM_AARCH64_ELF += rc4/rc4_skey.c
+ASM_AARCH64_ELF += whrlpool/wp_block.c
+
+EXTRA_DIST += $(ASM_AARCH64_ELF)
+
+if HOST_ASM_ELF_AARCH64
+libcrypto_la_CPPFLAGS += -DVPAES_ASM
+libcrypto_la_CPPFLAGS += -DOPENSSL_BN_ASM_MONT
+libcrypto_la_CPPFLAGS += -DSHA1_ASM
+libcrypto_la_CPPFLAGS += -DSHA256_ASM
+libcrypto_la_CPPFLAGS += -DSHA512_ASM
+libcrypto_la_CPPFLAGS += -DOPENSSL_CPUID_OBJ
+libcrypto_la_SOURCES += $(ASM_AARCH64_ELF)
+endif

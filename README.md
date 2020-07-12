@@ -13,6 +13,7 @@ see https://github.com/dot-asm/cryptogams and `LICENSE.cryptogams`.
 The following files are taken from OpenSSL and are subject to the OpenSSL
 license; pre-Apache 2.0 commits were used:
 
+- `bsaes-armv7.pl`: `b0edda11cbfe91e8b99b09909a80a810d0143891`
 - `vpaes-armv8.pl`: `46f4e1bec51dc96fa275c168752aa34359d9ee51`
 - `armv8-mont.pl`: `6aa36e8e5a062e31543e7796f0351ff9628832ce`
 - `arm64cpuid.pl`: `9a708bf982da1d2c9739339d16d7b021da955e00`
@@ -63,6 +64,7 @@ This project consists of:
  - 64-bit little endian POWER, ELFv2 ABI
  - 64-bit big endian POWER, ELFv2 or ELFv1 ABI
  - 32-bit big endian PowerPC
+ - Aarch64 little endian (plus associated support for 32-bit with ARMv8)
 
 ## Usage
 

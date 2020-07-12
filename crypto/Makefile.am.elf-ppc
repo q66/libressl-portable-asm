@@ -1,5 +1,5 @@
 # 32-bit PowerPC, big endian, SVR4 ABI
-    
+
 ASM_PPC_ELF = aes/aes-elf-ppc.S
 ASM_PPC_ELF += aes/aesp8-elf-ppc.S
 ASM_PPC_ELF += aes/vpaes-elf-ppc.S

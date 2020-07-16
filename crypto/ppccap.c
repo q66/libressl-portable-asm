@@ -24,6 +24,14 @@
 # include <elf.h>
 # include <fcntl.h>
 # include <unistd.h>
+# define HWCAP_VSX       (1 <<  7)
+# define HWCAP_POWER6    (1 <<  9)
+# define HWCAP_FPU       (1 << 27)
+# define HWCAP_ALTIVEC   (1 << 28)
+# define HWCAP_PPC64     (1 << 30)
+/* hwcap2 */
+# define HWCAP_ISA300    (1 << 23)
+# define HWCAP_CRYPTO207 (1 << 25)
 #endif
 
 #include "ppc_arch.h"
@@ -142,31 +150,27 @@ OPENSSL_cpuid_setup(void)
 			}
 		}
 
-		/* altivec */
-		if ((hwcap >> 28) & 1) {
+		if (hwcap & HWCAP_ALTIVEC) {
 			OPENSSL_ppccap_P |= PPC_ALTIVEC;
 
-			/* vsx && vec_crypto */
-			if (((hwcap >> 7) & 1) && ((hwcap2 >> 25) & 1))
+			if ((hwcap & HWCAP_VSX) && (hwcap2 & HWCAP_CRYPTO207))
 				OPENSSL_ppccap_P |= PPC_CRYPTO207;
 		}
 
 		/* fpu */
-		if ((hwcap >> 27) & 1) {
+		if (hwcap & HWCAP_FPU) {
 			OPENSSL_ppccap_P |= PPC_FPU;
 # ifdef __powerpc64__
-			/* power6 */
-			if ((hwcap >> 9) & 1)
+			if (hwcap & HWCAP_POWER6)
 				OPENSSL_ppccap_P |= PPC_FPU64;
 # else
-			/* ppc64, fpu64 is always fastest on 32-bit if available */
-			if ((hwcap >> 30) & 1)
+			/* fpu64 is always fastest on 32-bit if available */
+			if (hwcap & HWCAP_PPC64)
 				OPENSSL_ppccap_P |= PPC_FPU64;
-#endif
+# endif
 		}
 
-		/* isa 3.0 */
-		if ((hwcap2 >> 23))
+		if (hwcap2 & HWCAP_ISA300)
 			OPENSSL_ppccap_P |= PPC_MADD300;
 
 		close(fd);
@@ -184,9 +188,9 @@ OPENSSL_cpuid_setup(void)
 	sigfillset(&all_masked);
 	sigdelset(&all_masked, SIGILL);
 	sigdelset(&all_masked, SIGTRAP);
-#ifdef SIGEMT
+# ifdef SIGEMT
 	sigdelset(&all_masked, SIGEMT);
-#endif
+# endif
 	sigdelset(&all_masked, SIGFPE);
 	sigdelset(&all_masked, SIGBUS);
 	sigdelset(&all_masked, SIGSEGV);
@@ -203,14 +207,14 @@ OPENSSL_cpuid_setup(void)
 	if (sigsetjmp(ill_jmp, 1) == 0) {
 		OPENSSL_fpu_probe();
 		OPENSSL_ppccap_P |= PPC_FPU;
-#ifndef __powerpc64__
+# ifndef __powerpc64__
 		if (sigsetjmp(ill_jmp, 1) == 0) {
 			OPENSSL_ppc64_probe();
 			OPENSSL_ppccap_P |= PPC_FPU64;
 		}
-#else
+# else
 		/* FIXME, detect power6 */
-#endif
+# endif
 	}
 
 	if (sigsetjmp(ill_jmp, 1) == 0) {

@@ -168,6 +168,8 @@ OPENSSL_cpuid_setup(void)
 		/* isa 3.0 */
 		if ((hwcap2 >> 23))
 			OPENSSL_ppccap_P |= PPC_MADD300;
+
+		close(fd);
 	}
 #else
 	/* fallback that uses SIGILL and probes */

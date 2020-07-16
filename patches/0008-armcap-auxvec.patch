@@ -1,0 +1,117 @@
+On Linux, we can utilize the aux vector to get hardware capabilities, without
+needing the SIGILL hacks. Implement this in a way that can mostly be shared
+between arm and aarch64 with minimal code duplication.
+
+--- a/crypto/armcap.c
++++ b/crypto/armcap.c
+@@ -6,11 +6,41 @@
+ #include <signal.h>
+ #include <openssl/crypto.h>
+ 
++/* on Linux, we can use the auxiliary vector and avoid SIGILL stuff */
++#ifdef __linux__
++# define LSSL_USE_AUXV 1
++#endif
++
++#ifdef LSSL_USE_AUXV
++# include <elf.h>
++# include <fcntl.h>
++# include <unistd.h>
++/* from asm/hwcap.h
++ *
++ * on 32-bit arm we use hwcap and hwcap2, on aarch64 only hwcap
++ * on aarch64 we make hwcap2 the same as hwcap to simplify the code
++ */
++# if defined(__aarch64__)
++#  define HWCAP_NEON   (1 << 1) /* HWCAP_ASIMD */
++#  define HWCAP_AES    (1 << 3)
++#  define HWCAP_PMULL  (1 << 4)
++#  define HWCAP_SHA1   (1 << 5)
++#  define HWCAP_SHA256 (1 << 6)
++#  define HWCAP_SHA512 (1 << 21)
++#  else
++#  define HWCAP_NEON   (1 << 12) /* from HWCAP, the rest is from HWCAP2 */
++#  define HWCAP_AES    (1 << 0)
++#  define HWCAP_PMULL  (1 << 1)
++#  define HWCAP_SHA1   (1 << 2)
++#  define HWCAP_SHA256 (1 << 3)
++#  endif
++#endif
++
+ #include "arm_arch.h"
+ 
+ unsigned int OPENSSL_armcap_P;
+ 
+-#if __ARM_ARCH__ >= 7
++#if !defined(LSSL_USE_AUXV) && __ARM_ARCH__ >= 7
+ static sigset_t all_masked;
+ 
+ static sigjmp_buf ill_jmp;
+@@ -38,7 +68,14 @@ void OPENSSL_cpuid_setup(void) __attribute__((constructor));
+ void
+ OPENSSL_cpuid_setup(void)
+ {
+-#if __ARM_ARCH__ >= 7
++#ifdef LSSL_USE_AUXV
++	int fd;
++# ifdef __powerpc64__
++	Elf64_auxv_t aux;
++# else
++	Elf32_auxv_t aux;
++# endif
++#elif __ARM_ARCH__ >= 7
+ 	struct sigaction	ill_oact, ill_act;
+ 	sigset_t		oset;
+ #endif
+@@ -50,7 +87,50 @@ OPENSSL_cpuid_setup(void)
+ 
+ 	OPENSSL_armcap_P = 0;
+ 
+-#if __ARM_ARCH__ >= 7
++#ifdef LSSL_USE_AUXV
++	fd = open("/proc/self/auxv", O_RDONLY | O_CLOEXEC);
++	unsigned long long hwcap = 0, hwcap2 = 0;
++	if (fd >= 0) {
++		while (read(fd, &aux, sizeof(aux)) == sizeof(aux)) {
++# if !defined(__aarch64__)
++			if (aux.a_type == AT_HWCAP) {
++				hwcap = aux.a_un.a_val;
++				if (hwcap2) break;
++			}
++			if (aux.a_type == AT_HWCAP2) {
++				hwcap2 = aux.a_un.a_val;
++				if (hwcap) break;
++			}
++# else
++			if (aux.a_type == AT_HWCAP) {
++				hwcap = hwcap2 = aux.a_un.a_val;
++				break;
++			}
++# endif
++		}
++		if (hwcap & HWCAP_NEON) {
++			OPENSSL_armcap_P |= ARMV7_NEON;
++			if (hwcap2 & HWCAP_AES) {
++				OPENSSL_armcap_P |= ARMV8_AES;
++			}
++			if (hwcap2 & HWCAP_PMULL) {
++				OPENSSL_armcap_P |= ARMV8_PMULL;
++			}
++			if (hwcap2 & HWCAP_SHA1) {
++				OPENSSL_armcap_P |= ARMV8_SHA1;
++			}
++			if (hwcap2 & HWCAP_SHA256) {
++				OPENSSL_armcap_P |= ARMV8_SHA256;
++			}
++# if defined(__aarch64__)
++			if (hwcap2 & HWCAP_SHA512) {
++				OPENSSL_armcap_P |= ARMV8_SHA512;
++			}
++# endif
++		}
++		close(fd);
++	}
++#elif __ARM_ARCH__ >= 7
+ 	sigfillset(&all_masked);
+ 	sigdelset(&all_masked, SIGILL);
+ 	sigdelset(&all_masked, SIGTRAP);

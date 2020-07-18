@@ -1,8 +1,30 @@
-Add back hwaes support for hardware crypto on POWER (later Aarch64).
+This adds support for a few things:
 
+- general hwaes support bits
+- ppc support for vpaes and hwaes
+- arm support for bsaes and armv8 hwaes
+- aarch64 support for vpaes and hwaes
+
+--- a/crypto/Makefile.am.elf-arm
++++ b/crypto/Makefile.am.elf-arm
+@@ -1,4 +1,6 @@
+ ASM_ARM_ELF = aes/aes-elf-armv4.S
++ASM_ARM_ELF += aes/aesv8-elf-armv4.S
++ASM_ARM_ELF += aes/bsaes-elf-armv4.S
+ ASM_ARM_ELF += bn/gf2m-elf-armv4.S
+ ASM_ARM_ELF += bn/mont-elf-armv4.S
+ ASM_ARM_ELF += sha/sha1-elf-armv4.S
+@@ -19,6 +21,7 @@ EXTRA_DIST += $(ASM_ARM_ELF)
+ 
+ if HOST_ASM_ELF_ARM
+ libcrypto_la_CPPFLAGS += -DAES_ASM
++libcrypto_la_CPPFLAGS += -DBSAES_ASM
+ libcrypto_la_CPPFLAGS += -DOPENSSL_BN_ASM_MONT
+ libcrypto_la_CPPFLAGS += -DOPENSSL_BN_ASM_GF2m
+ libcrypto_la_CPPFLAGS += -DGHASH_ASM
 --- a/crypto/evp/e_aes.c
 +++ b/crypto/evp/e_aes.c
-@@ -144,6 +144,50 @@ void AES_xts_decrypt(const char *inp, char *out, size_t len,
+@@ -144,6 +144,70 @@ void AES_xts_decrypt(const char *inp, char *out, size_t len,
      const AES_KEY *key1, const AES_KEY *key2, const unsigned char iv[16]);
  #endif
  
@@ -22,6 +44,26 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
 +#   define HWAES_xts_encrypt aes_p8_xts_encrypt
 +#   define HWAES_xts_decrypt aes_p8_xts_decrypt
 +#  endif /* PPC */
++
++#  if (defined(__arm__) || defined(__arm) || defined(__aarch64__))
++#   include "arm_arch.h"
++#   if __ARM_ARCH__>=7
++#    if defined(BSAES_ASM)
++#     define BSAES_CAPABLE (OPENSSL_armcap_P & ARMV7_NEON)
++#    endif
++#    if defined(VPAES_ASM)
++#     define VPAES_CAPABLE (OPENSSL_armcap_P & ARMV7_NEON)
++#    endif
++#    define HWAES_CAPABLE (OPENSSL_armcap_P & ARMV8_AES)
++#    define HWAES_set_encrypt_key aes_v8_set_encrypt_key
++#    define HWAES_set_decrypt_key aes_v8_set_decrypt_key
++#    define HWAES_encrypt aes_v8_encrypt
++#    define HWAES_decrypt aes_v8_decrypt
++#    define HWAES_cbc_encrypt aes_v8_cbc_encrypt
++#    define HWAES_ecb_encrypt aes_v8_ecb_encrypt
++#    define HWAES_ctr32_encrypt_blocks aes_v8_ctr32_encrypt_blocks
++#   endif
++#  endif /* ARM */
 +# endif /* OPENSSL_CPUID_OBJ */
 +
 +# if defined(HWAES_CAPABLE)
@@ -53,7 +95,7 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
  #if	defined(AES_ASM) &&				(  \
  	((defined(__i386)	|| defined(__i386__)	|| \
  	  defined(_M_IX86)) && defined(OPENSSL_IA32_SSE2))|| \
-@@ -510,6 +554,17 @@ aes_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
+@@ -510,6 +574,17 @@ aes_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
  	mode = ctx->cipher->flags & EVP_CIPH_MODE;
  	if ((mode == EVP_CIPH_ECB_MODE || mode == EVP_CIPH_CBC_MODE) &&
  	    !enc)
@@ -71,7 +113,7 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
  #ifdef BSAES_CAPABLE
  		if (BSAES_CAPABLE && mode == EVP_CIPH_CBC_MODE) {
  			ret = AES_set_decrypt_key(key, ctx->key_len * 8,
-@@ -534,6 +589,24 @@ aes_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
+@@ -534,6 +609,24 @@ aes_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
  			dat->stream.cbc = mode == EVP_CIPH_CBC_MODE ?
  			    (cbc128_f)AES_cbc_encrypt : NULL;
  		} else
@@ -96,7 +138,7 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
  #ifdef BSAES_CAPABLE
  		if (BSAES_CAPABLE && mode == EVP_CIPH_CTR_MODE) {
  			ret = AES_set_encrypt_key(key, ctx->key_len * 8,
-@@ -859,6 +932,17 @@ static ctr128_f
+@@ -859,6 +952,17 @@ static ctr128_f
  aes_gcm_set_key(AES_KEY *aes_key, GCM128_CONTEXT *gcm_ctx,
      const unsigned char *key, size_t key_len)
  {
@@ -114,7 +156,7 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
  #ifdef BSAES_CAPABLE
  	if (BSAES_CAPABLE) {
  		AES_set_encrypt_key(key, key_len * 8, aes_key);
-@@ -1120,6 +1204,30 @@ aes_xts_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
+@@ -1120,6 +1224,30 @@ aes_xts_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
  		xctx->stream = NULL;
  #endif
  		/* key_len is two AES keys */
@@ -145,7 +187,7 @@ Add back hwaes support for hardware crypto on POWER (later Aarch64).
  #ifdef BSAES_CAPABLE
  		if (BSAES_CAPABLE)
  			xctx->stream = enc ? bsaes_xts_encrypt :
-@@ -1273,6 +1381,16 @@ aes_ccm_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
+@@ -1273,6 +1401,16 @@ aes_ccm_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
  	if (!iv && !key)
  		return 1;
  	if (key) do {

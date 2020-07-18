@@ -1,8 +1,18 @@
-This hooks the ARM ghash assembly stuff into the build.
+This adds support for POWER8 and ARMv8 ghash assembly into the build as
+well as updates the 32-bit ARM NEON assembly hooks.
 
 --- a/crypto/modes/gcm128.c
 +++ b/crypto/modes/gcm128.c
-@@ -659,13 +659,21 @@ void gcm_ghash_4bit_mmx(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len
+@@ -640,7 +640,7 @@ static void gcm_gmult_1bit(u64 Xi[2],const u64 H[2])
+ #include "x86_arch.h"
+ #endif
+ 
+-#if	TABLE_BITS==4 && defined(GHASH_ASM)
++#if	TABLE_BITS==4 && (defined(GHASH_ASM) || defined(OPENSSL_CPUID_OBJ))
+ # if	(defined(__i386)	|| defined(__i386__)	|| \
+ 	 defined(__x86_64)	|| defined(__x86_64__)	|| \
+ 	 defined(_M_IX86)	|| defined(_M_AMD64)	|| defined(_M_X64))
+@@ -659,14 +659,30 @@ void gcm_ghash_4bit_mmx(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len
  void gcm_gmult_4bit_x86(u64 Xi[2],const u128 Htable[16]);
  void gcm_ghash_4bit_x86(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len);
  #  endif
@@ -24,9 +34,18 @@ This hooks the ARM ghash assembly stuff into the build.
 +void gcm_gmult_v8(u64 Xi[2],const u128 Htable[16]);
 +void gcm_ghash_v8(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len);
  #  endif
- # elif defined(OPENSSL_CPUID_OBJ) && (defined(__powerpc__) || defined(__ppc__) || defined(_ARCH_PPC))
- #  include "ppc_arch.h"
-@@ -742,10 +750,21 @@ void CRYPTO_gcm128_init(GCM128_CONTEXT *ctx,void *key,block128_f block)
++# elif defined(OPENSSL_CPUID_OBJ) && (defined(__powerpc__) || defined(__ppc__) || defined(_ARCH_PPC))
++#  include "ppc_arch.h"
++#  define GHASH_ASM_PPC
++#  define GCM_FUNCREF_4BIT
++void gcm_init_p8(u128 Htable[16], const u64 Xi[2]);
++void gcm_gmult_p8(u64 Xi[2], const u128 Htable[16]);
++void gcm_ghash_p8(u64 Xi[2], const u128 Htable[16], const u8 *inp,
++                  size_t len);
+ # endif
+ #endif
+ 
+@@ -734,9 +750,30 @@ void CRYPTO_gcm128_init(GCM128_CONTEXT *ctx,void *key,block128_f block)
  	ctx->ghash = gcm_ghash_4bit;
  #  endif
  # elif	defined(GHASH_ASM_ARM)
@@ -43,10 +62,18 @@ This hooks the ARM ghash assembly stuff into the build.
 +		gcm_init_neon(ctx->Htable,ctx->H.u);
  		ctx->gmult = gcm_gmult_neon;
  		ctx->ghash = gcm_ghash_neon;
--	} else {
 +	} else
 +#  endif
 +	{
++		gcm_init_4bit(ctx->Htable,ctx->H.u);
++		ctx->gmult = gcm_gmult_4bit;
++		ctx->ghash = gcm_ghash_4bit;
++	}
++# elif defined(GHASH_ASM_PPC)
++	if (OPENSSL_ppccap_P & PPC_CRYPTO207) {
++		gcm_init_p8(ctx->Htable,ctx->H.u);
++		ctx->gmult = gcm_gmult_p8;
++		ctx->ghash = gcm_ghash_p8;
+ 	} else {
  		gcm_init_4bit(ctx->Htable,ctx->H.u);
  		ctx->gmult = gcm_gmult_4bit;
- 		ctx->ghash = gcm_ghash_4bit;

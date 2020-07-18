@@ -26,7 +26,7 @@ This hooks ARM 64 and 32-bit HWAES and BSAES/VPAES into the build.
 +
 +#  if (defined(__arm__) || defined(__arm) || defined(__aarch64__))
 +#   include "arm_arch.h"
-+#   if __ARM_MAX_ARCH__>=7
++#   if __ARM_ARCH__>=7
 +#    if defined(BSAES_ASM)
 +#     define BSAES_CAPABLE (OPENSSL_armcap_P & ARMV7_NEON)
 +#    endif

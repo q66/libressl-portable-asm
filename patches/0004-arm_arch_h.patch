@@ -3,24 +3,7 @@ cpu detection and optimized algorithms.
 
 --- a/crypto/arm_arch.h
 +++ b/crypto/arm_arch.h
-@@ -4,21 +4,38 @@
- 
- #if !defined(__ARM_ARCH__)
- # if defined(__CC_ARM)
--#  define __ARM_ARCH__ __TARGET_ARCH_ARM
-+#  if __TARGET_ARCH_THUMB
-+#   define __thumb__
-+#   if __TARGET_ARCH_THUMB >= 4
-+#    define __thumb2__
-+#   endif
-+#  endif
-+#  if __TARGET_ARCH_ARM
-+#   define __ARM_ARCH__ __TARGET_ARCH_ARM
-+#  else
-+#   define __ARM_ARCH__ (__TARGET_ARCH_THUMB + 3)
-+#  endif
- #  if defined(__BIG_ENDIAN)
- #   define __ARMEB__
+@@ -10,15 +10,22 @@
  #  else
  #   define __ARMEL__
  #  endif
@@ -46,41 +29,13 @@ cpu detection and optimized algorithms.
  #  elif	defined(__ARM_ARCH_8A__)
  #   define __ARM_ARCH__ 8
  #  elif	defined(__ARM_ARCH_7__)	|| defined(__ARM_ARCH_7A__)	|| \
-@@ -39,20 +56,50 @@
- #  else
- #   error "unsupported ARM architecture"
- #  endif
-+# elif defined(_MSC_VER)
-+#  define __ARMEL__
-+#  if defined(_M_ARM)
-+#   define __ARM_ARCH__ _M_ARM
-+#   if defined(_M_THUMB)
-+#    define __thumb__
-+#    if _M_THUMB >= 7
-+#     define __thumb2__
-+#    endif
-+#   endif
-+#  elif defined(_M_ARM64)
-+#   define __AARCH64EL__
-+#   define __ARM_ARCH__ 8
-+#  else
-+#   error "unsupported ARM architecture"
-+#  endif
-+# endif
-+#endif
-+
-+#if !defined(__ARM_MAX_ARCH__)
-+# define __ARM_MAX_ARCH__ __ARM_ARCH__
-+#endif
-+
-+#if __ARM_MAX_ARCH__<__ARM_ARCH__
-+# error "__ARM_MAX_ARCH__ can't be less than __ARM_ARCH__"
-+#elif __ARM_MAX_ARCH__!=__ARM_ARCH__
-+# if __ARM_ARCH__<7 && __ARM_MAX_ARCH__>=7 && defined(__ARMEB__)
-+#  error "can't build universal big-endian binary"
+@@ -42,15 +49,20 @@
  # endif
  #endif
  
++/* compatibility with cryptogams/openssl asm */
++#define __ARM_MAX_ARCH__ __ARM_ARCH__
++
  #if !defined(__ASSEMBLER__)
  extern unsigned int OPENSSL_armcap_P;
 +#endif
@@ -98,8 +53,5 @@ cpu detection and optimized algorithms.
 +#define ARMV8_PMULL	(1<<5)
 +#define ARMV8_SHA512	(1<<6)
  
--#if defined(__OpenBSD__)
-+#if defined(__OpenBSD__) && __ARM_ARCH__<8
+ #if defined(__OpenBSD__)
  #define __STRICT_ALIGNMENT
- #endif
- 

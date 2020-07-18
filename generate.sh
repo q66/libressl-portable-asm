@@ -85,6 +85,7 @@ perlasm aarch64 arm64cpuid.pl cpuid outarg
 
 perlasm armv4 aes/asm/bsaes-armv7.pl aes/bsaes outarg
 perlasm armv4 aes/asm/aesv8-armx.pl aes/aesv8 outarg
+perlasm armv4 modes/asm/ghash-armv4.pl modes/ghash outarg
 perlasm armv4 modes/asm/ghashv8-armx.pl modes/ghashv8 outarg
 
 exit 0

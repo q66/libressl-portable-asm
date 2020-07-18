@@ -2,7 +2,7 @@ This hooks the ARM ghash assembly stuff into the build.
 
 --- a/crypto/modes/gcm128.c
 +++ b/crypto/modes/gcm128.c
-@@ -659,13 +659,20 @@ void gcm_ghash_4bit_mmx(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len
+@@ -659,13 +659,21 @@ void gcm_ghash_4bit_mmx(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len
  void gcm_gmult_4bit_x86(u64 Xi[2],const u128 Htable[16]);
  void gcm_ghash_4bit_x86(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len);
  #  endif
@@ -10,13 +10,14 @@ This hooks the ARM ghash assembly stuff into the build.
 +# elif defined(__arm__) || defined(__arm) || defined(__aarch64__)
  #  include "arm_arch.h"
 -#  if __ARM_ARCH__>=7 && !defined(__STRICT_ALIGNMENT)
-+#  if __ARM_ARCH__>=7 && (!defined(__STRICT_ALIGNMENT) || (__ARM_ARCH__>=8))
++#  if __ARM_MAX_ARCH__>=7
  #   define GHASH_ASM_ARM
  #   define GCM_FUNCREF_4BIT
 +#   define PMULL_CAPABLE        (OPENSSL_armcap_P & ARMV8_PMULL)
 +#   if defined(__arm__) || defined(__arm)
 +#    define NEON_CAPABLE        (OPENSSL_armcap_P & ARMV7_NEON)
 +#   endif
++void gcm_init_neon(u128 Htable[16],const u64 Xi[2]);
  void gcm_gmult_neon(u64 Xi[2],const u128 Htable[16]);
  void gcm_ghash_neon(u64 Xi[2],const u128 Htable[16],const u8 *inp,size_t len);
 +void gcm_init_v8(u128 Htable[16],const u64 Xi[2]);
@@ -25,7 +26,7 @@ This hooks the ARM ghash assembly stuff into the build.
  #  endif
  # elif defined(OPENSSL_CPUID_OBJ) && (defined(__powerpc__) || defined(__ppc__) || defined(_ARCH_PPC))
  #  include "ppc_arch.h"
-@@ -742,10 +749,20 @@ void CRYPTO_gcm128_init(GCM128_CONTEXT *ctx,void *key,block128_f block)
+@@ -742,10 +750,21 @@ void CRYPTO_gcm128_init(GCM128_CONTEXT *ctx,void *key,block128_f block)
  	ctx->ghash = gcm_ghash_4bit;
  #  endif
  # elif	defined(GHASH_ASM_ARM)
@@ -39,6 +40,7 @@ This hooks the ARM ghash assembly stuff into the build.
 +#  endif
 +#  ifdef NEON_CAPABLE
 +	if (NEON_CAPABLE) {
++		gcm_init_neon(ctx->Htable,ctx->H.u);
  		ctx->gmult = gcm_gmult_neon;
  		ctx->ghash = gcm_ghash_neon;
 -	} else {

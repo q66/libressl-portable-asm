@@ -62,14 +62,11 @@ cache:
   directories:
     - $TRAVIS_BUILD_DIR/distfiles/
 
-before_script:
+script:
   - tar xvzf distfiles/libressl-${LSSL_VERSION}.tar.gz
   - ./patch_libressl.sh libressl-${LSSL_VERSION}
   - cd libressl-${LSSL_VERSION}
   - autoreconf -if
-
-script:
-  - cd libressl-${LSSL_VERSION}
   - mkdir build && cd build
   - ../configure
   - make -j3 check

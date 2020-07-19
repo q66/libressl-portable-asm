@@ -1,5 +1,7 @@
 # Assembly extensions for LibreSSL-portable
 
+[![Build Status](https://travis-ci.com/q66/libressl-portable-asm.svg?branch=master)](https://travis-ci.com/q66/libressl-portable-asm)
+
 Since LibreSSL-portable does not support assembly for minority architectures
 such as POWER and Aarch64, this repo aims to re-add those to get better
 performance - on systems with hardware crypto, such as POWER8 and newer,

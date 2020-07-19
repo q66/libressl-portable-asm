@@ -1,6 +1,16 @@
 This adds support for POWER8 and ARMv8 ghash assembly into the build as
 well as updates the 32-bit ARM NEON assembly hooks.
 
+--- a/crypto/Makefile.am.elf-arm
++++ b/crypto/Makefile.am.elf-arm
+@@ -5,6 +5,7 @@ ASM_ARM_ELF += sha/sha1-elf-armv4.S
+ ASM_ARM_ELF += sha/sha512-elf-armv4.S
+ ASM_ARM_ELF += sha/sha256-elf-armv4.S
+ ASM_ARM_ELF += modes/ghash-elf-armv4.S
++ASM_ARM_ELF += modes/ghashv8-elf-armv4.S
+ ASM_ARM_ELF += armv4cpuid.S
+ ASM_ARM_ELF += armcap.c
+ 
 --- a/crypto/modes/gcm128.c
 +++ b/crypto/modes/gcm128.c
 @@ -640,7 +640,7 @@ static void gcm_gmult_1bit(u64 Xi[2],const u64 H[2])

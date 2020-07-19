@@ -14,7 +14,7 @@ This adds support for a few things:
  ASM_ARM_ELF += bn/gf2m-elf-armv4.S
  ASM_ARM_ELF += bn/mont-elf-armv4.S
  ASM_ARM_ELF += sha/sha1-elf-armv4.S
-@@ -19,6 +21,7 @@ EXTRA_DIST += $(ASM_ARM_ELF)
+@@ -20,6 +22,7 @@ EXTRA_DIST += $(ASM_ARM_ELF)
  
  if HOST_ASM_ELF_ARM
  libcrypto_la_CPPFLAGS += -DAES_ASM

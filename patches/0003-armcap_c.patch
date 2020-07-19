@@ -6,9 +6,9 @@ Also, add sha512 detection for armv8.
 
 --- a/crypto/armcap.c
 +++ b/crypto/armcap.c
-@@ -6,11 +6,43 @@
- #include <signal.h>
- #include <openssl/crypto.h>
+@@ -8,9 +8,41 @@
+ 
+ #include "arm_arch.h"
  
 +#if __ARM_ARCH__ >= 7
 +/* on Linux, we can use the auxiliary vector and avoid SIGILL stuff */
@@ -42,8 +42,6 @@ Also, add sha512 detection for armv8.
 +# endif
 +#endif
 +
- #include "arm_arch.h"
- 
  unsigned int OPENSSL_armcap_P;
  
 -#if __ARM_ARCH__ >= 7

@@ -7,10 +7,11 @@ Do the same as OpenSSL and always enable the macro except on x86, aarch64
 and s390(x).
 
 Upstream issue: https://github.com/libressl-portable/portable/issues/602
+Upstream PR: https://github.com/libressl-portable/portable/pull/604
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -75,28 +75,23 @@ AC_ARG_ENABLE([tests],
+@@ -75,26 +75,12 @@ AC_ARG_ENABLE([tests],
         [enable_tests="yes"])
  AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = xyes])
  
@@ -36,15 +37,21 @@ Upstream issue: https://github.com/libressl-portable/portable/issues/602
 -AS_IF([test "x$BSWAP4" = "xyes" -a "$host_cpu" = "arm" ],,CPPFLAGS="$CPPFLAGS -D__STRICT_ALIGNMENT")
  AM_CONDITIONAL([HOST_CPU_IS_INTEL], [test "x$HOSTARCH" = "xintel"])
  
-+# Add CPU-specific alignment flags
-+AS_CASE([$host_cpu],
-+	[*aarch64*], [],
-+	[*x86_64*], [],
-+	[i?86], [],
-+	[*s390*], [],
-+	[CPPFLAGS="$CPPFLAGS -D__STRICT_ALIGNMENT"]
-+)
-+
  AC_MSG_CHECKING([if .gnu.warning accepts long strings])
- AC_LINK_IFELSE([AC_LANG_SOURCE([[
- extern void SSLv3_method();
+--- a/include/compat/machine/endian.h
++++ b/include/compat/machine/endian.h
+@@ -37,4 +37,14 @@
+ 
+ #endif
+ 
++#ifndef __STRICT_ALIGNMENT
++#define __STRICT_ALIGNMENT
++#if defined(__i386)    || defined(__i386__)    || \
++    defined(__x86_64)  || defined(__x86_64__)  || \
++    defined(__s390__)  || defined(__s390x__)   || \
++    defined(__aarch64__)
++#undef __STRICT_ALIGNMENT
++#endif
++#endif
++
+ #endif

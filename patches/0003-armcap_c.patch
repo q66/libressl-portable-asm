@@ -65,7 +65,7 @@ Also, add sha512 detection for armv8.
  #if __ARM_ARCH__ >= 7
 +# ifdef LSSL_USE_AUXV
 +	int fd;
-+#  ifdef __powerpc64__
++#  ifdef __aarch64__
 +	Elf64_auxv_t aux;
 +#  else
 +	Elf32_auxv_t aux;

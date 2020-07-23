@@ -38,6 +38,16 @@ Upstream PR: https://github.com/libressl-portable/portable/pull/604
  AM_CONDITIONAL([HOST_CPU_IS_INTEL], [test "x$HOSTARCH" = "xintel"])
  
  AC_MSG_CHECKING([if .gnu.warning accepts long strings])
+--- a/crypto/gost/gost2814789.c
++++ b/crypto/gost/gost2814789.c
+@@ -56,6 +56,7 @@
+ #ifndef OPENSSL_NO_GOST
+ #include <openssl/objects.h>
+ #include <openssl/gost.h>
++#include <machine/endian.h>
+ 
+ #include "gost_locl.h"
+ 
 --- a/include/compat/machine/endian.h
 +++ b/include/compat/machine/endian.h
 @@ -37,4 +37,14 @@

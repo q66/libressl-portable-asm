@@ -13,8 +13,4 @@ extern unsigned int OPENSSL_ppccap_P;
 #define PPC_FPU64     (1<<3)
 #define PPC_MADD300   (1<<4)
 
-#if defined(__OpenBSD__)
-#define __STRICT_ALIGNMENT
-#endif
-
 #endif

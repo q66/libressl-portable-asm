@@ -15,10 +15,13 @@ see https://github.com/dot-asm/cryptogams and `LICENSE.cryptogams`.
 The following files are taken from OpenSSL and are subject to the OpenSSL
 license; pre-Apache 2.0 commits were used:
 
+- `aes-armv4.pl`: `b0edda11cbfe91e8b99b09909a80a810d0143891`
 - `bsaes-armv7.pl`: `b0edda11cbfe91e8b99b09909a80a810d0143891`
 - `vpaes-armv8.pl`: `46f4e1bec51dc96fa275c168752aa34359d9ee51`
 - `armv8-mont.pl`: `6aa36e8e5a062e31543e7796f0351ff9628832ce`
 - `ghash-armv4.pl`: `1212818eb07add297fe562eba80ac46a9893781e`
+- `sha256-armv4.pl`: `1212818eb07add297fe562eba80ac46a9893781e`
+- `sha512-armv4.pl`: `1212818eb07add297fe562eba80ac46a9893781e`
 - `arm64cpuid.pl`: `9a708bf982da1d2c9739339d16d7b021da955e00`, just CPU probes
 - `ppc-mont.pl`: `774ff8fed67e19d4f5f0df2f59050f2737abab2a`
 - `ppccpuid.pl`: OpenSSL 1.1.1g, just CPU probes

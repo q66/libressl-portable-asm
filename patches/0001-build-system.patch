@@ -3,7 +3,7 @@ architectures and ABIs.
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -113,11 +113,28 @@ AC_ARG_ENABLE([asm],
+@@ -98,11 +98,28 @@ AC_ARG_ENABLE([asm],
  	AS_HELP_STRING([--disable-asm], [Disable assembly]))
  AM_CONDITIONAL([OPENSSL_NO_ASM], [test "x$enable_asm" = "xno"])
  
@@ -34,7 +34,7 @@ architectures and ABIs.
  AM_CONDITIONAL([HOST_ASM_MASM_X86_64],
 --- a/crypto/Makefile.am
 +++ b/crypto/Makefile.am
-@@ -211,13 +211,23 @@ libcrypto_la_SOURCES =
+@@ -224,13 +224,23 @@ libcrypto_la_SOURCES =
  EXTRA_libcrypto_la_SOURCES =
  
  include Makefile.am.elf-arm
@@ -58,7 +58,7 @@ architectures and ABIs.
  if !HOST_ASM_MACOSX_X86_64
  if !HOST_ASM_MASM_X86_64
  if !HOST_ASM_MINGW64_X86_64
-@@ -233,6 +243,11 @@ endif
+@@ -246,6 +256,11 @@ endif
  endif
  endif
  endif
@@ -70,7 +70,7 @@ architectures and ABIs.
  
  libcrypto_la_SOURCES += cpt_err.c
  libcrypto_la_SOURCES += cryptlib.c
-@@ -256,6 +271,7 @@ noinst_HEADERS += cryptlib.h
+@@ -269,6 +284,7 @@ noinst_HEADERS += cryptlib.h
  noinst_HEADERS += md32_common.h
  noinst_HEADERS += o_time.h
  noinst_HEADERS += x86_arch.h

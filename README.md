@@ -28,7 +28,7 @@ license; pre-Apache 2.0 commits were used:
 
 See `LICENSE.openssl` for those.
 
-**For LibreSSL version: 3.1.3**
+**For LibreSSL version: 3.2.4**
 
 ## How?
 
